@@ -4,7 +4,6 @@ import { BrowserRouter, Route, Link, Switch } from "react-router-dom";
 import { Grid, Paper, Button, Typography } from "@material-ui/core";
 import axios from "axios";
 import DisplayList from "./DisplayList";
-import CustomerForm from "./CostumerForm";
 
 const customerUrl = "https://customerrest.herokuapp.com/api/customers";
 const trainigUrl = "https://customerrest.herokuapp.com/api/trainings";
@@ -52,12 +51,6 @@ const Home = () => {
   ]);
   const [customers, setCustomers] = useState([]);
   const [trainings, setTrainigs] = useState([]);
-  const [FormVisible, setFormVisible] = useState(false);
-  const [customerRender, setCustomerRender] = useState({});
-  const [customerRenderAction, setCustomerRenderAction] = useState("");
-  const [customerTrainingsVisible, setCustomerTrainingsVisible] = useState(
-    false
-  );
 
   const classes = useStyles();
 
@@ -72,33 +65,6 @@ const Home = () => {
     axios.get(trainigUrl).then(response => {
       setTrainigs(response.data.content);
     });
-  };
-
-  const collectCustomer = (customer, action) => {
-    switch (action) {
-      case "delete":
-        axios.delete(customer.links[0].href).then(_ => {
-          fetchData();
-        });
-
-        break;
-      case "add":
-        setCustomerRenderAction(action);
-        setCustomerRender(null);
-        setFormVisible(true);
-        console.log("add " + customer);
-        break;
-      case "update":
-        setCustomerRenderAction(action);
-        setCustomerRender(customer);
-        setFormVisible(true);
-        break;
-      case "display":
-        console.log("display " + customer);
-        break;
-      default:
-        break;
-    }
   };
 
   return (
@@ -140,24 +106,8 @@ const Home = () => {
                         <DisplayList
                           data={customers}
                           headers={customerHeaders}
-                          collectCustomer={collectCustomer}
+                          fetch={fetchData}
                         />
-                      </Grid>
-                      <Grid item>
-                        <Paper className={classes.root}>
-                          <Typography variant="h5" component="h3">
-                            {FormVisible ? (
-                              <CustomerForm
-                                customer={customerRender}
-                                action={customerRenderAction}
-                                fetch={fetchData}
-                                formVisible={setFormVisible}
-                              />
-                            ) : (
-                              "Nothing to display"
-                            )}
-                          </Typography>
-                        </Paper>
                       </Grid>
                     </Grid>
                   )}
@@ -165,11 +115,7 @@ const Home = () => {
                 <Route
                   path="/trainings"
                   render={() => (
-                    <DisplayList
-                      data={trainings}
-                      headers={trainingHeader}
-                      collectCustomer={collectCustomer}
-                    />
+                    <DisplayList data={trainings} headers={trainingHeader} />
                   )}
                 />
                 <Route

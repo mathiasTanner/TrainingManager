@@ -1,14 +1,12 @@
-import React, { forwardRef } from "react";
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-
 import MaterialTable from "material-table";
-import Search from "@material-ui/icons/Search";
-import ArrowUpward from "@material-ui/icons/ArrowUpward";
-import Clear from "@material-ui/icons/Clear";
-import FirstPage from "@material-ui/icons/FirstPage";
-import LastPage from "@material-ui/icons/LastPage";
-import ChevronLeft from "@material-ui/icons/ChevronLeft";
-import ChevronRight from "@material-ui/icons/ChevronRight";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import PropTypes from "prop-types";
 
 const useStyles = makeStyles({
@@ -23,36 +21,86 @@ const useStyles = makeStyles({
 
 const DisplayList = props => {
   const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
+  const [deleteCustomer, setDeleteCustomer] = React.useState({});
 
-  const tableIcons = {
-    ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-    Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
-    SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref} />),
-    FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
-    LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
-    NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-    PreviousPage: forwardRef((props, ref) => (
-      <ChevronLeft {...props} ref={ref} />
-    ))
+  const handleClickOpen = (rowData, event) => {
+    setDeleteCustomer(event);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const confirmDelete = () => {
+    props.collectCustomer(deleteCustomer, "delete");
+    handleClose();
   };
 
   return (
-    <MaterialTable
-      icons={tableIcons}
-      title="Customer List"
-      columns={props.headers}
-      data={props.data}
-      options={{
-        search: true,
-        sorting: true
-      }}
-    />
+    <div>
+      <MaterialTable
+        title="Customer List"
+        columns={props.headers}
+        data={props.data}
+        options={{
+          search: true,
+          sorting: true
+        }}
+        actions={[
+          {
+            icon: "update",
+            tooltip: "Update User",
+            onClick: (event, rowData) =>
+              props.collectCustomer(rowData, "update")
+          },
+          {
+            icon: "add",
+            tooltip: "Add User",
+            isFreeAction: true,
+            onClick: event => props.collectCustomer(null, "add")
+          },
+          rowData => ({
+            icon: "delete",
+            tooltip: "Delete User",
+            onClick: (event, rowData) => handleClickOpen(event, rowData)
+          })
+        ]}
+        options={{
+          actionsColumnIndex: -1
+        }}
+      />
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm delete"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete {deleteCustomer.firstname}{" "}
+            {deleteCustomer.lastname} definitively?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            No
+          </Button>
+          <Button onClick={confirmDelete} color="primary" autoFocus>
+            yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 };
 
 DisplayList.propTypes = {
   data: PropTypes.array.isRequired,
-  headers: PropTypes.array.isRequired
+  headers: PropTypes.array.isRequired,
+  collectCustomer: PropTypes.func.isRequired
 };
 
 export default DisplayList;

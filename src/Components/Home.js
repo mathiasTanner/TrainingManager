@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { BrowserRouter, Route, Link, Switch } from "react-router-dom";
-import { Grid, Paper, Button } from "@material-ui/core";
+import { Grid, Paper, Button, Typography } from "@material-ui/core";
 import axios from "axios";
 import DisplayList from "./DisplayList";
 
@@ -54,13 +54,41 @@ const Home = () => {
   const classes = useStyles();
 
   useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = () => {
     axios.get(customerUrl).then(response => {
       setCustomers(response.data.content);
     });
     axios.get(trainigUrl).then(response => {
       setTrainigs(response.data.content);
     });
-  }, []);
+  };
+
+  const collectCustomer = (customer, action) => {
+    switch (action) {
+      case "delete":
+        axios.delete(customer.links[0].href).then(_ => {
+          fetchData();
+        });
+
+        break;
+      case "add":
+        console.log("add " + customer);
+        break;
+      case "update":
+        console.log("update: ");
+        console.log(customer);
+
+        break;
+      case "display":
+        console.log("display " + customer);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div className={classes.root}>
@@ -96,13 +124,21 @@ const Home = () => {
                 <Route
                   path="/customers"
                   render={() => (
-                    <DisplayList data={customers} headers={customerHeaders} />
+                    <DisplayList
+                      data={customers}
+                      headers={customerHeaders}
+                      collectCustomer={collectCustomer}
+                    />
                   )}
                 />
                 <Route
                   path="/trainings"
                   render={() => (
-                    <DisplayList data={trainings} headers={trainingHeader} />
+                    <DisplayList
+                      data={trainings}
+                      headers={trainingHeader}
+                      collectCustomer={collectCustomer}
+                    />
                   )}
                 />
                 <Route
@@ -112,6 +148,13 @@ const Home = () => {
                 />
                 <Route render={() => <h1>page not found</h1>} />
               </Switch>
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper className={classes.root}>
+              <Typography variant="h5" component="h3">
+                display detail area.
+              </Typography>
             </Paper>
           </Grid>
         </Grid>

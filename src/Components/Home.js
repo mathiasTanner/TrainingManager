@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Link, Switch } from "react-router-dom";
 import { Grid, Paper, Button, Typography } from "@material-ui/core";
 import axios from "axios";
 import DisplayList from "./DisplayList";
+import CustomerForm from "./CostumerForm";
 
 const customerUrl = "https://customerrest.herokuapp.com/api/customers";
 const trainigUrl = "https://customerrest.herokuapp.com/api/trainings";
@@ -34,6 +35,7 @@ const Home = () => {
       field: "postcode",
       type: "numeric"
     },
+    { title: "City", field: "city" },
     { title: "E-mail", field: "email" },
     {
       title: "Phone",
@@ -50,6 +52,12 @@ const Home = () => {
   ]);
   const [customers, setCustomers] = useState([]);
   const [trainings, setTrainigs] = useState([]);
+  const [FormVisible, setFormVisible] = useState(false);
+  const [customerRender, setCustomerRender] = useState({});
+  const [customerRenderAction, setCustomerRenderAction] = useState("");
+  const [customerTrainingsVisible, setCustomerTrainingsVisible] = useState(
+    false
+  );
 
   const classes = useStyles();
 
@@ -75,12 +83,15 @@ const Home = () => {
 
         break;
       case "add":
+        setCustomerRenderAction(action);
+        setCustomerRender(null);
+        setFormVisible(true);
         console.log("add " + customer);
         break;
       case "update":
-        console.log("update: ");
-        console.log(customer);
-
+        setCustomerRenderAction(action);
+        setCustomerRender(customer);
+        setFormVisible(true);
         break;
       case "display":
         console.log("display " + customer);
@@ -124,11 +135,31 @@ const Home = () => {
                 <Route
                   path="/customers"
                   render={() => (
-                    <DisplayList
-                      data={customers}
-                      headers={customerHeaders}
-                      collectCustomer={collectCustomer}
-                    />
+                    <Grid>
+                      <Grid item>
+                        <DisplayList
+                          data={customers}
+                          headers={customerHeaders}
+                          collectCustomer={collectCustomer}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Paper className={classes.root}>
+                          <Typography variant="h5" component="h3">
+                            {FormVisible ? (
+                              <CustomerForm
+                                customer={customerRender}
+                                action={customerRenderAction}
+                                fetch={fetchData}
+                                formVisible={setFormVisible}
+                              />
+                            ) : (
+                              "Nothing to display"
+                            )}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    </Grid>
                   )}
                 />
                 <Route
@@ -148,13 +179,6 @@ const Home = () => {
                 />
                 <Route render={() => <h1>page not found</h1>} />
               </Switch>
-            </Paper>
-          </Grid>
-          <Grid item xs={12}>
-            <Paper className={classes.root}>
-              <Typography variant="h5" component="h3">
-                display detail area.
-              </Typography>
             </Paper>
           </Grid>
         </Grid>

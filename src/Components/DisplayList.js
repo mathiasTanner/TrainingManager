@@ -1,13 +1,17 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import MaterialTable from "material-table";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import PropTypes from "prop-types";
+import {
+  Typography,
+  Paper,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
+} from "@material-ui/core";
 
 const useStyles = makeStyles({
   root: {
@@ -46,11 +50,18 @@ const DisplayList = props => {
         data={props.data}
         options={{
           search: true,
-          sorting: true
+          sorting: true,
+          actionsColumnIndex: -1
         }}
         actions={[
           {
-            icon: "update",
+            icon: "details",
+            tooltip: "Show Details",
+            onClick: (event, rowData) =>
+              props.collectCustomer(rowData, "display")
+          },
+          {
+            icon: "edit",
             tooltip: "Update User",
             onClick: (event, rowData) =>
               props.collectCustomer(rowData, "update")
@@ -67,9 +78,18 @@ const DisplayList = props => {
             onClick: (event, rowData) => handleClickOpen(event, rowData)
           })
         ]}
-        options={{
-          actionsColumnIndex: -1
-        }}
+        detailPanel={[
+          {
+            tooltip: "Show Name",
+            render: rowData => {
+              return (
+                <Paper>
+                  <Typography>{rowData.firstname}</Typography>
+                </Paper>
+              );
+            }
+          }
+        ]}
       />
       <Dialog
         open={open}
@@ -85,7 +105,7 @@ const DisplayList = props => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleClose} color="secondary">
             No
           </Button>
           <Button onClick={confirmDelete} color="primary" autoFocus>

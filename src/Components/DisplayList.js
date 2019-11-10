@@ -1,18 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import MaterialTable from "material-table";
 import PropTypes from "prop-types";
-import {
-  Typography,
-  Paper,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions
-} from "@material-ui/core";
+import { Paper } from "@material-ui/core";
 import axios from "axios";
+import TrainingList from "./TrainingList";
 
 const useStyles = makeStyles({
   root: {
@@ -26,64 +18,37 @@ const useStyles = makeStyles({
 
 const DisplayList = props => {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-  const [deleteCustomer, setDeleteCustomer] = React.useState({});
+  const [trainingData, setTrainingData] = useState([]);
+  const [trainigListVisible, setTrainingListVisible] = useState(false);
+  const [rowInfo, setRowInfos] = useState({});
 
-  const handleClickOpen = (rowData, event) => {
-    setDeleteCustomer(event);
-    setOpen(true);
-  };
+  let moment = require("moment");
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const confirmDelete = () => {
-    props.collectCustomer(deleteCustomer, "delete");
-    handleClose();
+  const fetchTrainings = event => {
+    setTrainingListVisible(false);
+    axios
+      .get(event.links[2].href)
+      .then(response => {
+        setTrainingData(response.data.content);
+      })
+      .then(setTrainingListVisible(true));
   };
 
   return (
-    <MaterialTable
-      title="Customer List"
-      columns={props.headers}
-      data={props.data}
-      options={{
-        search: true,
-        sorting: true,
-        actionsColumnIndex: -1
-      }}
-      detailPanel={[
-        {
-          tooltip: "Show trainings",
-          render: rowData => {
-            let data = null;
-            axios.get(rowData.links[2].href).then(response => {
-              data = response.data.content;
-              return (
-                <Paper>
-                  <DisplayList
-                    data={data}
-                    headers={[
-                      {
-                        title: "Date",
-                        field: "date"
-                      },
-                      { title: "Duration", field: "duration" },
-                      { title: "Activity", field: "activity" }
-                    ]}
-                  />
-                </Paper>
-              );
-            });
-          }
-        }
-      ]}
-      editable={{
-        onRowAdd: newData =>
-          new Promise((resolve, reject) => {
-            setTimeout(() => {
-              {
+    <Paper>
+      <MaterialTable
+        title="Customer List"
+        columns={props.headers}
+        data={props.data}
+        options={{
+          search: true,
+          sorting: true,
+          actionsColumnIndex: -1
+        }}
+        editable={{
+          onRowAdd: newData =>
+            new Promise((resolve, reject) => {
+              setTimeout(() => {
                 axios
                   .post(
                     "https://customerrest.herokuapp.com/api/customers",
@@ -92,35 +57,54 @@ const DisplayList = props => {
                   .then(_ => {
                     props.fetch();
                   });
-              }
-              resolve();
-            }, 1000);
-          }),
-        onRowUpdate: (newData, oldData) =>
-          new Promise((resolve, reject) => {
-            setTimeout(() => {
-              {
+                resolve();
+              }, 1000);
+            }),
+          onRowUpdate: (newData, oldData) =>
+            new Promise((resolve, reject) => {
+              setTimeout(() => {
                 axios.put(newData.links[0].href, newData).then(_ => {
                   props.fetch();
                 });
-              }
-              resolve();
-            }, 1000);
-          }),
-        onRowDelete: oldData =>
-          new Promise((resolve, reject) => {
-            setTimeout(() => {
-              {
+                resolve();
+              }, 1000);
+            }),
+          onRowDelete: oldData =>
+            new Promise((resolve, reject) => {
+              setTimeout(() => {
                 axios.delete(oldData.links[0].href).then(_ => {
                   props.fetch();
                 });
-              }
-              resolve();
-            }, 1000);
-          })
-      }}
-      onRowClick={togglePanel => togglePanel()}
-    />
+                resolve();
+              }, 1000);
+            })
+        }}
+        onRowClick={(rowData, event) => {
+          setRowInfos(event);
+          fetchTrainings(event);
+        }}
+      />
+      {trainigListVisible ? (
+        <TrainingList
+          data={trainingData}
+          headers={[
+            {
+              title: "Date",
+              field: "date",
+              type: "date",
+              render: rowData =>
+                moment(rowData.date).format("MMMM Do YYYY, hh:mm a")
+            },
+            { title: "Duration", field: "duration", type: "numeric" },
+            { title: "Activity", field: "activity" }
+          ]}
+          fetch={fetchTrainings}
+          rowInfo={rowInfo}
+        />
+      ) : (
+        ""
+      )}
+    </Paper>
   );
 };
 

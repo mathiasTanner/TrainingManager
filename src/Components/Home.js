@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Link, Switch } from "react-router-dom";
 import { Grid, Paper, Button, Typography } from "@material-ui/core";
 import axios from "axios";
 import DisplayList from "./DisplayList";
+import TrainingList from "./TrainingList";
 
 const customerUrl = "https://customerrest.herokuapp.com/api/customers";
 const trainigUrl = "https://customerrest.herokuapp.com/api/trainings";
@@ -22,6 +23,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Home = () => {
+  let moment = require("moment");
   const [customerHeaders, setCustomerHeaders] = useState([
     {
       title: "First Name",
@@ -44,7 +46,9 @@ const Home = () => {
   const [trainingHeader, setTrainingHeaders] = useState([
     {
       title: "Date",
-      field: "date"
+      field: "date",
+      type: "date",
+      render: rowData => moment(rowData.date).format("MMMM Do YYYY, hh:mm a")
     },
     { title: "Duration", field: "duration" },
     { title: "Activity", field: "activity" }
@@ -89,9 +93,9 @@ const Home = () => {
                 color="primary"
                 className={classes.button}
                 component={Link}
-                to="/trainings"
+                to="/calendar"
               >
-                Trainings
+                Calendar
               </Button>
             </Paper>
           </Grid>
@@ -113,9 +117,9 @@ const Home = () => {
                   )}
                 />
                 <Route
-                  path="/trainings"
+                  path="/calendar"
                   render={() => (
-                    <DisplayList data={trainings} headers={trainingHeader} />
+                    <Typography variant="h2">to come soon!</Typography>
                   )}
                 />
                 <Route

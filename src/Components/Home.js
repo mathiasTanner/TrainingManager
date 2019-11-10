@@ -4,7 +4,7 @@ import { BrowserRouter, Route, Link, Switch } from "react-router-dom";
 import { Grid, Paper, Button, Typography } from "@material-ui/core";
 import axios from "axios";
 import DisplayList from "./DisplayList";
-import TrainingList from "./TrainingList";
+import Calendar from "./Calendar";
 
 const customerUrl = "https://customerrest.herokuapp.com/api/customers";
 const trainigUrl = "https://customerrest.herokuapp.com/api/trainings";
@@ -116,12 +116,7 @@ const Home = () => {
                     </Grid>
                   )}
                 />
-                <Route
-                  path="/calendar"
-                  render={() => (
-                    <Typography variant="h2">to come soon!</Typography>
-                  )}
-                />
+                <Route path="/calendar" render={() => <Calendar />} />
                 <Route
                   exact
                   path="/"

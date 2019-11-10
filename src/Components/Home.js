@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { BrowserRouter, Route, Link, Switch } from "react-router-dom";
-import { Grid, Paper, Button } from "@material-ui/core";
+import { Grid, Paper, Button, Typography } from "@material-ui/core";
 import axios from "axios";
 import DisplayList from "./DisplayList";
+import TrainingList from "./TrainingList";
 
 const customerUrl = "https://customerrest.herokuapp.com/api/customers";
 const trainigUrl = "https://customerrest.herokuapp.com/api/trainings";
@@ -22,6 +23,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Home = () => {
+  let moment = require("moment");
   const [customerHeaders, setCustomerHeaders] = useState([
     {
       title: "First Name",
@@ -34,6 +36,7 @@ const Home = () => {
       field: "postcode",
       type: "numeric"
     },
+    { title: "City", field: "city" },
     { title: "E-mail", field: "email" },
     {
       title: "Phone",
@@ -43,7 +46,9 @@ const Home = () => {
   const [trainingHeader, setTrainingHeaders] = useState([
     {
       title: "Date",
-      field: "date"
+      field: "date",
+      type: "date",
+      render: rowData => moment(rowData.date).format("MMMM Do YYYY, hh:mm a")
     },
     { title: "Duration", field: "duration" },
     { title: "Activity", field: "activity" }
@@ -54,13 +59,17 @@ const Home = () => {
   const classes = useStyles();
 
   useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = () => {
     axios.get(customerUrl).then(response => {
       setCustomers(response.data.content);
     });
     axios.get(trainigUrl).then(response => {
       setTrainigs(response.data.content);
     });
-  }, []);
+  };
 
   return (
     <div className={classes.root}>
@@ -84,9 +93,9 @@ const Home = () => {
                 color="primary"
                 className={classes.button}
                 component={Link}
-                to="/trainings"
+                to="/calendar"
               >
-                Trainings
+                Calendar
               </Button>
             </Paper>
           </Grid>
@@ -96,13 +105,21 @@ const Home = () => {
                 <Route
                   path="/customers"
                   render={() => (
-                    <DisplayList data={customers} headers={customerHeaders} />
+                    <Grid>
+                      <Grid item>
+                        <DisplayList
+                          data={customers}
+                          headers={customerHeaders}
+                          fetch={fetchData}
+                        />
+                      </Grid>
+                    </Grid>
                   )}
                 />
                 <Route
-                  path="/trainings"
+                  path="/calendar"
                   render={() => (
-                    <DisplayList data={trainings} headers={trainingHeader} />
+                    <Typography variant="h2">to come soon!</Typography>
                   )}
                 />
                 <Route

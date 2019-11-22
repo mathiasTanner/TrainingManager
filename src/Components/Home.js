@@ -69,13 +69,6 @@ const Home = () => {
     axios.get(trainigUrl).then(response => {
       setTrainigs(response.data.content);
     });
-    axios
-      .get("http://eventmanager-backend.herokuapp.com/events")
-      .then(response => {
-        console.log("got there");
-
-        console.log(response.data.content);
-      });
   };
 
   return (
